@@ -23,8 +23,15 @@ try {
     process.stdout.write(encode(JSON.parse(fs.readFileSync(0, "utf8")), { number }));
   } else if (cmd === "decode") {
     process.stdout.write(jstr(decode(fs.readFileSync(0, "utf8"))) + "\n");
+  } else if (cmd === "lint") {
+    // Honey Wire Profile (PROFILE.md): W1/W4/W5/W6 on one payload from stdin.
+    const { lint } = require("../js/lint");
+    const { findings } = lint(fs.readFileSync(0, "utf8"));
+    for (const f of findings) process.stderr.write(`${f.level === "error" ? "ERROR" : "hint "} ${f.rule}: ${f.message}\n`);
+    if (!findings.length) process.stderr.write("ok — no wire-profile findings\n");
+    process.exit(findings.some((f) => f.level === "error") ? 1 : 0);
   } else {
-    process.stderr.write("Usage: eso encode [--number] | eso decode  (JSON/ESO via stdin/stdout)\n");
+    process.stderr.write("Usage: eso encode [--number] | eso decode | eso lint  (stdin/stdout)\n");
     process.exit(1);
   }
 } catch (e) {

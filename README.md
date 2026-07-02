@@ -23,6 +23,13 @@ messages, a queue). Its readers are language models and programs, so the repo
 ships the two things both need: conformance vectors for parsers and a
 [canonical primer](PRIMER.md) for models.
 
+For end-to-end pipes, two thin layers ride on top — think `Content-Encoding`,
+not a new HTTP: the **[Honey Wire Profile](PROFILE.md)** (eight testable rules
+for token-efficient, integrity-checked agent messages; `eso lint` checks the
+per-message ones) and **[wire negotiation](NEGOTIATION.md)** (capability
+tokens, self-identifying payloads, mandatory compact-JSON fallback — adoption
+is never a compatibility bet).
+
 ## Why (measured, not vibes)
 
 Token cost on realistic handoff documents (o200k tokenizer, `npm run bench:formats`):
@@ -65,6 +72,7 @@ npm test             # JS + Python suites + shared conformance vectors
 
 echo '{"findings":[{"sev":"high","msg":"no auth"}]}' | node bin/eso.js encode --number
 node bin/eso.js decode < doc.eso
+node bin/eso.js lint < message.json   # Honey Wire Profile: W1/W4/W5/W6, exit 1 on MUST violation
 ```
 
 ```js
@@ -85,6 +93,8 @@ Both implementations are dependency-free single files
 ## Repo layout
 
 - [SPEC.md](SPEC.md) — normative spec, v1.1 (`!eso/1` wire format)
+- [PROFILE.md](PROFILE.md) — the Honey Wire Profile: rules W1–W8 for any agent pipe
+- [NEGOTIATION.md](NEGOTIATION.md) — encoding negotiation and fallback
 - [PRIMER.md](PRIMER.md) — canonical model primer; part of the wire contract
 - [vectors/vectors.json](vectors/vectors.json) — conformance vectors; an
   implementation conforms iff it passes them (`vectors/generate.js` regenerates)
