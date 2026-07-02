@@ -100,8 +100,11 @@ Both implementations are dependency-free single files
   implementation conforms iff it passes them (`vectors/generate.js` regenerates)
 - [js/](js/), [py/](py/) — reference implementations + tests
 - [bench/](bench/) — deterministic token benchmarks with committed results:
-  [FORMATS.md](bench/FORMATS.md) (`npm run bench:formats`) and
-  [PRIMER-COST.md](bench/PRIMER-COST.md) (`npm run bench:primer`); the
+  [FORMATS.md](bench/FORMATS.md) (`npm run bench:formats`),
+  [PRIMER-COST.md](bench/PRIMER-COST.md) (`npm run bench:primer`), and the
+  live end-to-end [WIRE.md](bench/WIRE.md) (`node bench/wire.mjs`, needs
+  `ANTHROPIC_API_KEY`: primer + dispatch line → 100% valid ESO, −24% wire
+  tokens at 100% recovery); the
   model-comprehension methodology lives in the
   [honey benchmark suite](https://github.com/Green-PT/honey-for-devs/tree/main/bench/eso)
 
