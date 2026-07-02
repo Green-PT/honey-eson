@@ -1,0 +1,20 @@
+{
+  "name": "eso-format",
+  "version": "1.1.0",
+  "description": "ESO (Efficient Structured Output) — a compact, lossless wire encoding for agent-to-agent structured payloads. Spec, reference implementations (JS + Python), conformance vectors, canonical LLM primer, benchmarks.",
+  "license": "MIT",
+  "main": "js/index.js",
+  "bin": { "eso": "bin/eso.js" },
+  "scripts": {
+    "test": "node --test js/*.test.js && python3 py/test_vectors.py",
+    "vectors": "node vectors/generate.js",
+    "bench:formats": "node bench/formats.mjs",
+    "bench:primer": "node bench/primer-cost.mjs"
+  },
+  "files": ["js", "py", "bin", "vectors", "SPEC.md", "PRIMER.md"],
+  "devDependencies": {
+    "@anthropic-ai/tokenizer": "^0.0.4",
+    "@toon-format/toon": "^2.3.0",
+    "gpt-tokenizer": "^3.4.0"
+  }
+}

@@ -1,0 +1,18 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node --test js/*.test.js
+      - run: python3 py/test_vectors.py
+      # vectors must be exactly what the reference implementation generates
+      - run: node vectors/generate.js && git diff --exit-code vectors/vectors.json

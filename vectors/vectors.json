@@ -1,0 +1,329 @@
+{
+  "eso": "1",
+  "valid": [
+    {
+      "name": "scalar string bare",
+      "value": {
+        "greeting": "hello world"
+      },
+      "eso": "!eso/1\ngreeting=hello world\n"
+    },
+    {
+      "name": "scalar types",
+      "value": {
+        "s": "x",
+        "i": 42,
+        "f": 3.14,
+        "neg": -2.5,
+        "t": true,
+        "fl": false,
+        "nil": null
+      },
+      "eso": "!eso/1\ns=x\ni=42\nf=3.14\nneg=-2.5\nt=true\nfl=false\nnil=null\n"
+    },
+    {
+      "name": "quoted: empty string",
+      "value": {
+        "s": ""
+      },
+      "eso": "!eso/1\ns=\"\"\n"
+    },
+    {
+      "name": "quoted: literal lookalikes",
+      "value": {
+        "a": "null",
+        "b": "true",
+        "c": "false"
+      },
+      "eso": "!eso/1\na=\"null\"\nb=\"true\"\nc=\"false\"\n"
+    },
+    {
+      "name": "quoted: number lookalikes",
+      "value": {
+        "a": "42",
+        "b": "1.0",
+        "c": "01",
+        "d": "-0",
+        "e": "1e3"
+      },
+      "eso": "!eso/1\na=\"42\"\nb=\"1.0\"\nc=01\nd=\"-0\"\ne=\"1e3\"\n"
+    },
+    {
+      "name": "quoted: whitespace and control",
+      "value": {
+        "a": "  padded  ",
+        "b": "a\tb",
+        "c": "a\nb"
+      },
+      "eso": "!eso/1\na=\"  padded  \"\nb=\"a\\tb\"\nc=\"a\\nb\"\n"
+    },
+    {
+      "name": "quoted: JSON-opening characters",
+      "value": {
+        "a": "\"quote",
+        "b": "[bracket",
+        "c": "{brace"
+      },
+      "eso": "!eso/1\na=\"\\\"quote\"\nb=\"[bracket\"\nc=\"{brace\"\n"
+    },
+    {
+      "name": "bare: grammar lookalikes are data in cells",
+      "value": {
+        "a": "!eso/1",
+        "b": "x[2]{y}",
+        "c": "k=v"
+      },
+      "eso": "!eso/1\na=!eso/1\nb=x[2]{y}\nc=k=v\n"
+    },
+    {
+      "name": "unicode strings",
+      "value": {
+        "s": "café 🚀",
+        "back": "back\\slash"
+      },
+      "eso": "!eso/1\ns=café 🚀\nback=back\\slash\n"
+    },
+    {
+      "name": "scalar array",
+      "value": {
+        "xs": [
+          1,
+          "two",
+          null,
+          true
+        ]
+      },
+      "eso": "!eso/1\nxs[4]\n1\ntwo\nnull\ntrue\n"
+    },
+    {
+      "name": "empty array",
+      "value": {
+        "xs": []
+      },
+      "eso": "!eso/1\nxs[0]\n"
+    },
+    {
+      "name": "record array",
+      "value": {
+        "findings": [
+          {
+            "severity": "high",
+            "file": "src/auth.js",
+            "line": 42,
+            "message": "token never expires"
+          },
+          {
+            "severity": "medium",
+            "file": "src/api.js",
+            "line": 18,
+            "message": "missing rate limit"
+          },
+          {
+            "severity": "low",
+            "file": "src/ui.js",
+            "line": null,
+            "message": "true"
+          }
+        ]
+      },
+      "eso": "!eso/1\nfindings[3]{severity,file,line,message}\nhigh\tsrc/auth.js\t42\ttoken never expires\nmedium\tsrc/api.js\t18\tmissing rate limit\nlow\tsrc/ui.js\tnull\t\"true\"\n"
+    },
+    {
+      "name": "numbered record array (reserved n)",
+      "value": {
+        "rows": [
+          {
+            "n": 1,
+            "x": "a"
+          },
+          {
+            "n": 2,
+            "x": "b"
+          },
+          {
+            "n": 3,
+            "x": "c"
+          }
+        ]
+      },
+      "eso": "!eso/1\nrows[3]{n,x}\n1\ta\n2\tb\n3\tc\n"
+    },
+    {
+      "name": "single record",
+      "value": {
+        "meta": {
+          "complete": true,
+          "retry": null
+        }
+      },
+      "eso": "!eso/1\nmeta{complete,retry}\ntrue\tnull\n"
+    },
+    {
+      "name": "empty object",
+      "value": {
+        "meta": {}
+      },
+      "eso": "!eso/1\nmeta{}\n\n"
+    },
+    {
+      "name": "empty records in array",
+      "value": {
+        "rows": [
+          {},
+          {}
+        ]
+      },
+      "eso": "!eso/1\nrows[2]{}\n\n\n"
+    },
+    {
+      "name": "nested values as JSON cells",
+      "value": {
+        "cfg": {
+          "tags": [
+            "security",
+            "api"
+          ],
+          "limits": {
+            "rps": 10,
+            "burst": null
+          }
+        },
+        "rows": [
+          {
+            "id": 1,
+            "opts": {
+              "deep": [
+                1,
+                2
+              ]
+            }
+          }
+        ]
+      },
+      "eso": "!eso/1\ncfg{tags,limits}\n[\"security\",\"api\"]\t{\"rps\":10,\"burst\":null}\nrows[1]{id,opts}\n1\t{\"deep\":[1,2]}\n"
+    },
+    {
+      "name": "mixed-type array falls back to scalar rows",
+      "value": {
+        "xs": [
+          {
+            "a": 1
+          },
+          "plain",
+          2
+        ]
+      },
+      "eso": "!eso/1\nxs[3]\n{\"a\":1}\nplain\n2\n"
+    },
+    {
+      "name": "full envelope",
+      "value": {
+        "from": "reviewer",
+        "to": "implementer",
+        "kind": "code_review",
+        "id": "review-42",
+        "findings": [
+          {
+            "severity": "high",
+            "file": "src/auth.js",
+            "line": 42,
+            "message": "token never expires"
+          },
+          {
+            "severity": "medium",
+            "file": "src/api.js",
+            "line": 18,
+            "message": "missing rate limit"
+          }
+        ],
+        "meta": {
+          "complete": true,
+          "retry": null,
+          "tags": [
+            "security",
+            "api"
+          ]
+        }
+      },
+      "eso": "!eso/1\nfrom=reviewer\nto=implementer\nkind=code_review\nid=review-42\nfindings[2]{severity,file,line,message}\nhigh\tsrc/auth.js\t42\ttoken never expires\nmedium\tsrc/api.js\t18\tmissing rate limit\nmeta{complete,retry,tags}\ntrue\tnull\t[\"security\",\"api\"]\n"
+    }
+  ],
+  "decode_only": [
+    {
+      "name": "CRLF line endings",
+      "value": {
+        "a": 1,
+        "rows": [
+          {
+            "x": "y"
+          }
+        ]
+      },
+      "eso": "!eso/1\r\na=1\r\nrows[1]{x}\r\ny\r\n"
+    },
+    {
+      "name": "missing trailing newline",
+      "value": {
+        "a": 1
+      },
+      "eso": "!eso/1\na=1"
+    },
+    {
+      "name": "needlessly quoted bare-safe string",
+      "value": {
+        "s": "plain"
+      },
+      "eso": "!eso/1\ns=\"plain\"\n"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "missing header",
+      "eso": "a=1\n"
+    },
+    {
+      "name": "wrong version header",
+      "eso": "!eso/2\na=1\n"
+    },
+    {
+      "name": "truncated record array (count checksum)",
+      "eso": "!eso/1\nrows[2]{id}\n1\n"
+    },
+    {
+      "name": "extra row becomes invalid section",
+      "eso": "!eso/1\nrows[1]{id}\n1\n2\n"
+    },
+    {
+      "name": "row with wrong cell count",
+      "eso": "!eso/1\nrows[1]{a,b}\n1\n"
+    },
+    {
+      "name": "duplicate top-level name",
+      "eso": "!eso/1\na=1\na=2\n"
+    },
+    {
+      "name": "duplicate field name",
+      "eso": "!eso/1\nrow{x,x}\n1\t2\n"
+    },
+    {
+      "name": "invalid name",
+      "eso": "!eso/1\n1abc=1\n"
+    },
+    {
+      "name": "reserved n not sequential",
+      "eso": "!eso/1\nrows[2]{n,x}\n1\ta\n3\tb\n"
+    },
+    {
+      "name": "reserved n reordered",
+      "eso": "!eso/1\nrows[2]{n,x}\n2\ta\n1\tb\n"
+    },
+    {
+      "name": "malformed JSON cell",
+      "eso": "!eso/1\na={\"broken\n"
+    },
+    {
+      "name": "non-finite number",
+      "eso": "!eso/1\nn=1e999\n"
+    }
+  ]
+}
