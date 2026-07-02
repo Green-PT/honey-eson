@@ -89,8 +89,10 @@ Both implementations are dependency-free single files
 - [vectors/vectors.json](vectors/vectors.json) — conformance vectors; an
   implementation conforms iff it passes them (`vectors/generate.js` regenerates)
 - [js/](js/), [py/](py/) — reference implementations + tests
-- [bench/](bench/) — deterministic token benchmarks (`formats`, `primer-cost`);
-  the model-comprehension methodology lives in the
+- [bench/](bench/) — deterministic token benchmarks with committed results:
+  [FORMATS.md](bench/FORMATS.md) (`npm run bench:formats`) and
+  [PRIMER-COST.md](bench/PRIMER-COST.md) (`npm run bench:primer`); the
+  model-comprehension methodology lives in the
   [honey benchmark suite](https://github.com/Green-PT/honey-for-devs/tree/main/bench/eso)
 
 ## Provenance
