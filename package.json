@@ -1,10 +1,10 @@
 {
-  "name": "eso-format",
+  "name": "eson-format",
   "version": "1.1.0",
-  "description": "ESO (Efficient Structured Output) — a compact, lossless wire encoding for agent-to-agent structured payloads. Spec, reference implementations (JS + Python), conformance vectors, canonical LLM primer, benchmarks.",
+  "description": "ESON (Efficient Structured Object Notation) — a compact, lossless wire encoding for agent-to-agent structured payloads. Spec, reference implementations (JS + Python), conformance vectors, canonical LLM primer, benchmarks.",
   "license": "MIT",
   "main": "js/index.js",
-  "bin": { "eso": "bin/eso.js" },
+  "bin": { "eson": "bin/eson.js" },
   "scripts": {
     "test": "node --test js/*.test.js && python3 py/test_vectors.py",
     "vectors": "node vectors/generate.js",

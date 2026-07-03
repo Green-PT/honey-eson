@@ -22,10 +22,10 @@ test("W1: pretty-printed JSON is an error", () => {
   assert.deepEqual(rules("not a payload"), ["W1"]);
 });
 
-test("W4: corrupt ESO is an error", () => {
-  const bad = "!eso/1\nrows[2]{n,x}\n1\ta\n3\tb\n"; // broken n sequence
+test("W4: corrupt ESON is an error", () => {
+  const bad = "!eson/1\nrows[2]{n,x}\n1\ta\n3\tb\n"; // broken n sequence
   assert.deepEqual(rules(bad), ["W4"]);
-  assert.deepEqual(rules("!eso/1\nrows[3]{id}\n1\n2\n"), ["W4"]); // count checksum
+  assert.deepEqual(rules("!eson/1\nrows[3]{id}\n1\n2\n"), ["W4"]); // count checksum
 });
 
 test("W5: undeduped uniform record arrays are a suggestion", () => {
@@ -41,8 +41,8 @@ test("W5: undeduped uniform record arrays are a suggestion", () => {
 });
 
 test("W6: carve-out fields in dense encodings are errors", () => {
-  const eso = encode({ payments: [{ to: "acct-1", amount: 500 }], note: "batch" });
-  assert.deepEqual(rules(eso), ["W6"]);
+  const eson = encode({ payments: [{ to: "acct-1", amount: 500 }], note: "batch" });
+  assert.deepEqual(rules(eson), ["W6"]);
   const col = JSON.stringify({ migrations: { "#c": ["id", "sql"], "#r": [[1, "DROP TABLE x"]] } });
   assert.deepEqual(rules(col), ["W6"]);
 });

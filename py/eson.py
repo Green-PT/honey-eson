@@ -1,4 +1,4 @@
-"""ESO (Efficient Structured Output) — Python implementation. Spec: ../SPEC.md
+"""ESON (Efficient Structured Object Notation) — Python implementation. Spec: ../SPEC.md
 
 Lossless, line-oriented wire format for agent-to-agent handoffs.
 Arbitrary-precision integers are native ``int``; JSON is used for nested cells.
@@ -9,20 +9,20 @@ from __future__ import annotations
 import json
 import re
 
-HEADER = "!eso/1"
+HEADER = "!eson/1"
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]*$")
 _NUMBER = re.compile(r"^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$")
 _SCALAR = re.compile(r"^([A-Za-z_][A-Za-z0-9_.-]*)=(.*)$")
 _SECTION = re.compile(r"^([A-Za-z_][A-Za-z0-9_.-]*)(?:\[(\d+)\])?(?:\{([^}]*)\})?$")
 
 
-class ESOError(ValueError):
+class ESONError(ValueError):
     """Raised on malformed documents or unencodable values."""
 
 
 def _assert_name(name: str) -> None:
     if not _NAME.match(name):
-        raise ESOError(f"Invalid ESO name: {name}")
+        raise ESONError(f"Invalid ESON name: {name}")
 
 
 def _json(value, seen=None):
@@ -36,12 +36,12 @@ def _json(value, seen=None):
         return str(value)
     if isinstance(value, float):
         if value != value or value in (float("inf"), float("-inf")):
-            raise ESOError("ESO only supports finite numbers")
+            raise ESONError("ESON only supports finite numbers")
         return json.dumps(value)
     if not isinstance(value, (list, dict)):
-        raise ESOError(f"Unsupported ESO value: {type(value).__name__}")
+        raise ESONError(f"Unsupported ESON value: {type(value).__name__}")
     if id(value) in seen:
-        raise ESOError("ESO does not support cyclic values")
+        raise ESONError("ESON does not support cyclic values")
     seen.add(id(value))
     if isinstance(value, list):
         out = "[" + ",".join(_json(item, seen) for item in value) + "]"
@@ -49,7 +49,7 @@ def _json(value, seen=None):
         parts = []
         for key, item in value.items():
             if not isinstance(key, str):
-                raise ESOError(f"Unsupported ESO key: {type(key).__name__}")
+                raise ESONError(f"Unsupported ESON key: {type(key).__name__}")
             parts.append(json.dumps(key, ensure_ascii=False) + ":" + _json(item, seen))
         out = "{" + ",".join(parts) + "}"
     seen.discard(id(value))
@@ -84,13 +84,13 @@ def _value(text: str):
             return int(text)  # arbitrary precision, no 2^53 corruption
         parsed = float(text)
         if parsed in (float("inf"), float("-inf")):
-            raise ESOError(f"Invalid ESO number: {text}")
+            raise ESONError(f"Invalid ESON number: {text}")
         return parsed
     if text[:1] and text[:1] in '"[{':
         try:
             return json.loads(text)
         except json.JSONDecodeError:
-            raise ESOError(f"Invalid ESO cell: {text}") from None
+            raise ESONError(f"Invalid ESON cell: {text}") from None
     return text
 
 
@@ -99,14 +99,14 @@ def _is_record(value) -> bool:
 
 
 def encode(data: dict, *, number: bool = False) -> str:
-    """Encode a dict to an ESO document. ``number=True`` prepends a reserved
+    """Encode a dict to an ESON document. ``number=True`` prepends a reserved
     1-based ``n`` field to every record array (restores positional access)."""
     if not _is_record(data):
-        raise ESOError("ESO document root must be an object")
+        raise ESONError("ESON document root must be an object")
     lines = [HEADER]
     for name, item in data.items():
         if not isinstance(name, str):
-            raise ESOError(f"Unsupported ESO key: {type(name).__name__}")
+            raise ESONError(f"Unsupported ESON key: {type(name).__name__}")
         _assert_name(name)
         if isinstance(item, list):
             records = len(item) > 0 and all(_is_record(row) for row in item)
@@ -114,14 +114,14 @@ def encode(data: dict, *, number: bool = False) -> str:
                 fields = list(item[0].keys())
                 for field in fields:
                     if not isinstance(field, str):
-                        raise ESOError(f"Unsupported ESO key: {type(field).__name__}")
+                        raise ESONError(f"Unsupported ESON key: {type(field).__name__}")
                     _assert_name(field)
                 if any(list(row.keys()) != fields for row in item):
-                    raise ESOError(f"ESO record array {name} must have one schema")
+                    raise ESONError(f"ESON record array {name} must have one schema")
                 rows = item
                 if number:
                     if "n" in fields:
-                        raise ESOError(f"ESO record array {name} already has a field n")
+                        raise ESONError(f"ESON record array {name} already has a field n")
                     fields = ["n"] + fields
                     rows = [{"n": i + 1, **row} for i, row in enumerate(item)]
                 lines.append(f"{name}[{len(item)}]{{{','.join(fields)}}}")
@@ -135,7 +135,7 @@ def encode(data: dict, *, number: bool = False) -> str:
             fields = list(item.keys())
             for field in fields:
                 if not isinstance(field, str):
-                    raise ESOError(f"Unsupported ESO key: {type(field).__name__}")
+                    raise ESONError(f"Unsupported ESON key: {type(field).__name__}")
                 _assert_name(field)
             lines.append(f"{name}{{{','.join(fields)}}}")
             lines.append("\t".join(_cell(item[field]) for field in fields))
@@ -145,14 +145,14 @@ def encode(data: dict, *, number: bool = False) -> str:
 
 
 def decode(source: str) -> dict:
-    """Decode an ESO document to a dict. Raises ESOError on malformed input."""
+    """Decode an ESON document to a dict. Raises ESONError on malformed input."""
     if not isinstance(source, str):
-        raise ESOError("ESO source must be a string")
+        raise ESONError("ESON source must be a string")
     lines = source.replace("\r\n", "\n").split("\n")
     if lines and lines[-1] == "":
         lines.pop()
     if not lines or lines.pop(0) != HEADER:
-        raise ESOError(f"Expected {HEADER}")
+        raise ESONError(f"Expected {HEADER}")
     output: dict = {}
     i = 0
     while i < len(lines):
@@ -162,24 +162,24 @@ def decode(source: str) -> dict:
         if match:
             name = match.group(1)
             if name in output:
-                raise ESOError(f"Duplicate ESO name: {name}")
+                raise ESONError(f"Duplicate ESON name: {name}")
             output[name] = _value(match.group(2))
             continue
         match = _SECTION.match(head)
         if not match or (match.group(2) is None and match.group(3) is None):
-            raise ESOError(f"Invalid ESO section: {head}")
+            raise ESONError(f"Invalid ESON section: {head}")
         name, count_text, field_text = match.groups()
         if name in output:
-            raise ESOError(f"Duplicate ESO name: {name}")
+            raise ESONError(f"Duplicate ESON name: {name}")
         count = 1 if count_text is None else int(count_text)
         fields = None if field_text is None else (field_text.split(",") if field_text else [])
         if fields is not None:
             for field in fields:
                 _assert_name(field)
             if len(set(fields)) != len(fields):
-                raise ESOError(f"Duplicate field in {name}")
+                raise ESONError(f"Duplicate field in {name}")
         if len(lines) - i < count:
-            raise ESOError(f"Section {name} expected {count} rows, got {len(lines) - i}")
+            raise ESONError(f"Section {name} expected {count} rows, got {len(lines) - i}")
         numbered = count_text is not None and fields is not None and fields[:1] == ["n"]
         rows = []
         for row_index in range(count):
@@ -190,10 +190,10 @@ def decode(source: str) -> dict:
                 continue
             cells = [] if not fields and line == "" else line.split("\t")
             if len(cells) != len(fields):
-                raise ESOError(f"Section {name} expected {len(fields)} cells, got {len(cells)}")
+                raise ESONError(f"Section {name} expected {len(fields)} cells, got {len(cells)}")
             row = {field: _value(cells[j]) for j, field in enumerate(fields)}
             if numbered and row["n"] != row_index + 1:
-                raise ESOError(
+                raise ESONError(
                     f"Section {name} row {row_index + 1} has n={row['n']}; n must be 1-based and sequential"
                 )
             rows.append(row)

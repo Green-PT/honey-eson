@@ -1,17 +1,17 @@
-# ESO — Efficient Structured Output, version 1.1
+# ESON — Efficient Structured Object Notation, version 1.1
 
-ESO is a compact, lossless, line-oriented text encoding for structured payloads
+ESON is a compact, lossless, line-oriented text encoding for structured payloads
 whose reader is a language model or a program — typically agent-to-agent
 handoffs. It optimizes the common shape: a small envelope of scalars plus
 uniform record arrays. It is UTF-8 and deliberately narrower than JSON.
 
 The key words MUST, MUST NOT, SHOULD, and MAY are to be interpreted as in
-RFC 2119. Version 1.1 is additive over 1.0: the wire header stays `!eso/1`;
+RFC 2119. Version 1.1 is additive over 1.0: the wire header stays `!eson/1`;
 1.0 documents remain valid except where they used a record array whose first
 field is named `n` (now reserved, §5).
 
-```eso
-!eso/1
+```eson
+!eson/1
 from=reviewer
 to=implementer
 kind=code_review
@@ -25,7 +25,7 @@ true	null
 ## 1. Grammar
 
 ```text
-document = "!eso/1" LF entry*
+document = "!eson/1" LF entry*
 entry    = name "=" cell LF                          ; scalar
          | name "[" count "]" LF row{count}          ; scalar array
          | name "[" count "]" "{" fields "}" LF row{count}   ; record array
@@ -74,13 +74,13 @@ failure rejects the document); anything else is the bare string itself.
 
 Names (top-level and field) MUST match the `name` production. Keys with
 spaces, non-ASCII characters, or a leading digit are rejected at encode time,
-not escaped — ESO assumes code-controlled identifiers. Payload *data* is
+not escaped — ESON assumes code-controlled identifiers. Payload *data* is
 unrestricted (any Unicode string encodes as a cell).
 
 ## 5. The reserved `n` field (positional access)
 
 Language models cannot reliably address "the Nth row" in any un-numbered
-format — measured 0–17% accuracy even on frontier models, in ESO, JSON, and
+format — measured 0–17% accuracy even on frontier models, in ESON, JSON, and
 columnar JSON alike. An explicit row number restores it to 100% for ~6–9%
 more tokens.
 
@@ -112,7 +112,7 @@ positionally, and omit `n` in pure key-lookup pipelines.
 
 ## 7. Scope and carve-outs
 
-ESO does not replace JSON for public APIs, deeply nested data, signatures, or
+ESON does not replace JSON for public APIs, deeply nested data, signatures, or
 untrusted input. Keep auth, money, migrations, deletion, and other
 irreversible instructions in JSON validated against an application schema;
 compactness is not worth an ambiguous high-impact action. Transports that
@@ -121,9 +121,9 @@ objects (§1); when in doubt, avoid `{}` payloads or wrap the document.
 
 ## 8. Versioning and conformance
 
-- The header names the wire version. Incompatible changes require `!eso/2`;
+- The header names the wire version. Incompatible changes require `!eson/2`;
   decoders MUST reject headers they do not support.
 - An implementation conforms iff it passes `vectors/vectors.json`: canonical
   encoding for `valid` (byte-equal), lossless decoding for `valid` and
   `decode_only`, and rejection of every `invalid` document.
-- Suggested media type: `text/vnd.eso`; suggested extension: `.eso`.
+- Suggested media type: `text/vnd.eson`; suggested extension: `.eson`.

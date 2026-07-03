@@ -6,10 +6,10 @@
 // Variants (the only difference is the wire instruction given to the sender):
 //   unprompted — no wire instruction (what agents do by default)
 //   json       — "compact minified JSON" (Profile W1 alone)
-//   eso        — NEGOTIATION.md dispatch line + PRIMER.md (+ numbered-rows addendum)
+//   eson        — NEGOTIATION.md dispatch line + PRIMER.md (+ numbered-rows addendum)
 //
 // Measured per variant: sender output tokens, handoff wire tokens (o200k),
-// ESO validity/lint pass rate, receiver accuracy on key-lookup / positional /
+// ESON validity/lint pass rate, receiver accuracy on key-lookup / positional /
 // absence queries.
 //
 //   ANTHROPIC_API_KEY=... node bench/wire.mjs     env: MODEL, RECEIVER_MODEL, RUNS
@@ -32,7 +32,7 @@ const PRIMER = /```text\n([\s\S]*?)```/g;
 const primers = [...fs.readFileSync(new URL("../PRIMER.md", import.meta.url), "utf8").matchAll(PRIMER)].map((m) => m[1].trim());
 const [BASE_PRIMER, N_ADDENDUM] = primers;
 
-// Ground-truth payload: 25 uniform records (the shape ESO targets).
+// Ground-truth payload: 25 uniform records (the shape ESON targets).
 const results = Array.from({ length: 25 }, (_, i) => ({
   rank: i + 1,
   source: `docs-${i}.example`,
@@ -50,10 +50,10 @@ const QUERIES = [
 const VARIANTS = {
   unprompted: { primer: null, instruction: "" },
   json: { primer: null, instruction: "Return the handoff as compact minified JSON (no indentation, no code fences)." },
-  eso: {
+  eson: {
     primer: `${BASE_PRIMER}\n\n${N_ADDENDUM}`,
     instruction:
-      "Return structured results as ESO (wire format !eso/1) per the primer you were given. " +
+      "Return structured results as ESON (wire format !eson/1) per the primer you were given. " +
       "Number the record array: make its first field n, the 1-based row number. No code fences.",
   },
 };
@@ -98,9 +98,9 @@ async function runCell(variantName, run) {
   });
   const handoff = stripFences(sender.text);
 
-  // ESO validity + profile compliance (objective)
+  // ESON validity + profile compliance (objective)
   let valid = null;
-  if (variantName === "eso") {
+  if (variantName === "eson") {
     const decoded = tryDecode(handoff);
     valid = decoded.ok && !lint(handoff).findings.some((f) => f.level === "error");
   }
@@ -140,14 +140,14 @@ const rows = Object.keys(VARIANTS).map((name) => {
     name,
     wire: mean(rs.map((r) => r.wireTok)),
     out: mean(rs.map((r) => r.senderOut)),
-    valid: name === "eso" ? pct(mean(rs.map((r) => (r.valid ? 1 : 0)))) : "—",
+    valid: name === "eson" ? pct(mean(rs.map((r) => (r.valid ? 1 : 0)))) : "—",
     acc: pct(mean(flat)),
     posAcc: pct(mean(rs.map((r) => r.correct[1]))), // the positional query
   };
 });
 const base = rows.find((r) => r.name === "unprompted");
 const table = [
-  "| Variant | Wire tok | vs unprompted | Sender out tok | Valid ESO | Recovery | Positional |",
+  "| Variant | Wire tok | vs unprompted | Sender out tok | Valid ESON | Recovery | Positional |",
   "|---------|---------:|--------------:|---------------:|----------:|---------:|-----------:|",
   ...rows.map((r) =>
     `| ${r.name} | ${r.wire.toFixed(0)} | ${r.name === "unprompted" ? "+0%" : `${Math.round((r.wire / base.wire - 1) * 100)}%`} | ` +
@@ -161,7 +161,7 @@ sender/receiver: \`${MODEL}\` / \`${RECEIVER_MODEL}\` · runs: ${RUNS} · payloa
 ${table}
 
 - **Wire tok** — o200k tokens of the handoff the sender actually produced.
-- **Valid ESO** — decodes per SPEC.md and passes \`eso lint\` with no MUST violations
+- **Valid ESON** — decodes per SPEC.md and passes \`eson lint\` with no MUST violations
   (checks that the canonical primer alone is enough to *produce* the format).
 - **Recovery** — receiver accuracy on key-lookup, positional, filtered-field, and absence
   queries answered from the handoff alone.
@@ -172,7 +172,7 @@ compact JSON — the +55% pretty-print waste is measured deterministically in
 FORMATS.md, not here. At 25 records the recovery queries saturate for every
 variant; the positional-access gap appears at ~50 records (see the honey
 comprehension suite). What this bench uniquely shows: the canonical primer +
-one dispatch line is sufficient for a model to PRODUCE spec-valid ESO.
+one dispatch line is sufficient for a model to PRODUCE spec-valid ESON.
 `;
 fs.writeFileSync(new URL("./WIRE.md", import.meta.url), report);
 console.log("\n" + report);
