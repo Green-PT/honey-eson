@@ -90,6 +90,83 @@ data = eson.decode(wire)   # raises eson.ESONError on malformed input
 Both implementations are dependency-free single files
 ([js/index.js](js/index.js), [py/eson.py](py/eson.py)) — vendoring is fine.
 
+## Use cases
+
+ESON pays off wherever one model's structured output becomes another model's
+input, at volume, behind a prompt cache:
+
+- **Orchestrator ↔ subagent handoffs** — a reviewer agent returns 30 findings
+  to an orchestrator; a scout agent returns a file/symbol map. Record arrays,
+  many messages per session: ESON's sweet spot (−35% on record arrays).
+- **Tool results fed to a model** — a scanner, linter, or search tool returns
+  hundreds of uniform rows that go straight into an agent's context. Encode
+  once at the tool boundary; every call saves.
+- **Queue/batch pipelines between LLM workers** — classify → extract → verify
+  stages passing record batches through a queue. Both ends are yours, traffic
+  is high, the primer is cached: full −28%.
+- **Multi-agent fleets with a shared system prompt** — one canonical primer in
+  the fleet's base prompt covers every agent; per-message savings are pure.
+
+Where it does **not** pay (use compact/columnar JSON): one-shot calls, scalar
+envelopes, uncached pipes, third-party receivers you can't put a primer in
+front of, and anything irreversible (auth, money, migrations, deletes — see
+the decision table above).
+
+## How to implement it
+
+Four steps. The codec handles the program side; the primer handles the model side.
+
+**1. Get the codec into both ends.** `npm install eson-format`, or vendor the
+single file ([js/index.js](js/index.js) or [py/eson.py](py/eson.py) — zero deps).
+
+**2. Put the canonical primer in the receiving model's system prompt.** Copy it
+**verbatim** from [PRIMER.md](PRIMER.md) (~126 tokens, cacheable). If you emit
+numbered rows, append the numbered-rows addendum too. Don't paraphrase it —
+the canonical text is what the comprehension benchmarks were run with.
+
+**3. Sender: encode at the boundary.** Use `number: true` whenever a model
+might address rows positionally ("the 3rd finding"):
+
+```js
+// orchestrator hands findings to a fixer agent
+const { encode } = require("eson-format");
+const payload = encode({ from: "reviewer", findings }, { number: true });
+await spawnAgent({ system: BASE_PROMPT + "\n" + ESON_PRIMER, message: payload });
+```
+
+**4. Receiver: decode in the program, verify, fall back.** Programs decode
+before routing; models read the wire text directly (that's the point — no
+decode step in the model's context):
+
+```js
+const { tryDecode } = require("eson-format");
+const { ok, value } = tryDecode(msg);        // non-throwing
+if (!ok) handleAsCompactJSON(msg);           // mandatory fallback (NEGOTIATION.md)
+```
+
+```python
+import eson
+try:
+    data = eson.decode(msg)
+except eson.ESONError:
+    data = json.loads(msg)                   # fallback path
+```
+
+The `[N]` count is a checksum — a primed model must report corruption on
+mismatch instead of answering from a truncated payload.
+
+**Hardening for production pipes:**
+
+- Lint outbound messages in CI or at send time:
+  `node bin/eson.js lint < message.json` (Honey Wire Profile W1/W4/W5/W6,
+  exit 1 on MUST violation).
+- Mixed fleet? Negotiate: advertise `eson/1` as a capability token, send
+  compact JSON to receivers that didn't ack ([NEGOTIATION.md](NEGOTIATION.md)).
+- Prove your implementation with the conformance vectors:
+  [vectors/vectors.json](vectors/vectors.json) — pass them all or it isn't ESON.
+- Shell pipes work too, no library integration needed:
+  `your-tool --json | node bin/eson.js encode --number`.
+
 ## Repo layout
 
 - [SPEC.md](SPEC.md) — normative spec, v1.1 (`!eson/1` wire format)
