@@ -167,6 +167,59 @@ mismatch instead of answering from a truncated payload.
 - Shell pipes work too, no library integration needed:
   `your-tool --json | node bin/eson.js encode --number`.
 
+## Platform recipes
+
+Comprehension was benchmarked on Claude **and** GPT families — these all use
+the same two moves: primer in the system-side prompt, `encode` at the boundary.
+
+**Claude Code.** Paste the primer into `CLAUDE.md` (or a skill) — every
+session and subagent can then read ESON. Two hook points:
+
+- Subagent returns: instruct agents in `.claude/agents/*.md` to return their
+  final result as ESON — the orchestrator pays −28% on every handoff it reads.
+- Tool output: pipe bulky JSON through the CLI before it enters context:
+  `gh api ... | node bin/eson.js encode --number`.
+
+**Claude Agent SDK.** Append the primer to the system prompt; feed encoded
+payloads as the message:
+
+```ts
+import { query } from "@anthropic-ai/claude-agent-sdk";
+const ESON_PRIMER = "..."; // the base primer, verbatim from PRIMER.md
+
+for await (const msg of query({
+  prompt: encode({ findings }, { number: true }),
+  options: { systemPrompt: { type: "preset", preset: "claude_code", append: ESON_PRIMER } },
+})) { /* ... */ }
+```
+
+**Anthropic API (raw).** Put the primer in a cached system block — the cache
+is what amortizes it:
+
+```python
+client.messages.create(
+    model="claude-sonnet-5",
+    system=[{"type": "text", "text": ESON_PRIMER,
+             "cache_control": {"type": "ephemeral"}}],
+    messages=[{"role": "user", "content": eson.encode({"findings": findings}, number=True)}],
+)
+```
+
+**OpenAI (Codex / GPT).** Same pattern: primer in `AGENTS.md` for Codex, or in
+the system/`instructions` field for the API; encode tool outputs and
+inter-agent messages. GPT models scored identically to Claude on the
+comprehension suite — including the `n`-field fix for positional access.
+
+**MCP servers.** Return ESON as the tool result's `text` content for
+record-heavy tools (search hits, scan findings, query rows); the client agent
+carries the primer. Keep the negotiation rule: only emit ESON when the client
+declared `eson/1`, else compact JSON ([NEGOTIATION.md](NEGOTIATION.md)).
+
+**Custom harnesses (LangGraph, CrewAI, hand-rolled).** Encode on every
+model-bound edge, decode in program code at router/aggregator nodes
+(`tryDecode` → compact-JSON fallback). Aggregate counts and filters in the
+node, never in the model — pass results, not raw rows to count.
+
 ## Repo layout
 
 - [SPEC.md](SPEC.md) — normative spec, v1.1 (`!eson/1` wire format)
