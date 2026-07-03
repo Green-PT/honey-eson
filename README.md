@@ -1,4 +1,4 @@
-# ESON — Efficient Structured Object Notation
+# Honey ESON — Efficient Structured Object Notation
 
 A compact, lossless wire encoding for **agent-to-agent structured payloads**.
 Line-oriented UTF-8, schema-once record arrays, counts that double as
