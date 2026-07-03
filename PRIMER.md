@@ -1,14 +1,14 @@
-# The ESO primer
+# The ESON primer
 
-ESO's readers are language models, so the text that teaches a model the format
+ESON's readers are language models, so the text that teaches a model the format
 is part of the wire contract. Use these canonical primers verbatim in the
-system prompt of any agent that receives ESO; they are the exact primers the
+system prompt of any agent that receives ESON; they are the exact primers the
 comprehension benchmarks were run with. Version them with the format.
 
 ## Base primer (~126 tokens, o200k)
 
 ```text
-Messages use ESO, a compact text format. The first line is the magic header !eso/1.
+Messages use ESON, a compact text format. The first line is the magic header !eson/1.
 Then entries: `name=value` is a scalar (bare strings are unquoted; null, booleans,
 numbers, and ambiguous or tab/newline strings use JSON). `name[N]{f1,f2}` declares
 N records sharing fields f1,f2; each following line is one record with TAB-separated
@@ -29,7 +29,7 @@ instead of answering from it.
 
 - The primer is a one-time, cacheable cost. Per-message savings vs columnar
   JSON must amortize it: with prompt caching that takes ~2 record-heavy
-  messages; without caching, or for scalar-heavy traffic, ESO does not pay —
+  messages; without caching, or for scalar-heavy traffic, ESON does not pay —
   use compact or columnar JSON instead (see README decision table).
 - Do not paraphrase the primer per-agent; a shared canonical text is what makes
   receiver behavior reproducible across a fleet.

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
-// eso encode [--number] < data.json > data.eso
-// eso decode < data.eso > data.json
+// eson encode [--number] < data.json > data.eson
+// eson decode < data.eson > data.json
 
 const fs = require("fs");
 const { decode, encode } = require("../js");
@@ -31,7 +31,7 @@ try {
     if (!findings.length) process.stderr.write("ok — no wire-profile findings\n");
     process.exit(findings.some((f) => f.level === "error") ? 1 : 0);
   } else {
-    process.stderr.write("Usage: eso encode [--number] | eso decode | eso lint  (stdin/stdout)\n");
+    process.stderr.write("Usage: eson encode [--number] | eson decode | eson lint  (stdin/stdout)\n");
     process.exit(1);
   }
 } catch (e) {

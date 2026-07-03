@@ -8,7 +8,7 @@ Every rule is backed by a measurement in [bench/](bench/) or the
 [honey comprehension suite](https://github.com/Green-PT/honey-for-devs/tree/main/bench/eso).
 
 The key words MUST, SHOULD, and MAY are per RFC 2119. Rules are numbered for
-tooling; `eso lint` checks the statically checkable ones per message
+tooling; `eson lint` checks the statically checkable ones per message
 (W1, W4, W5, W6) — the rest are conversation-level and are verified by
 behavior benches, not by linting a single message.
 
@@ -26,15 +26,15 @@ behavior benches, not by linting a single message.
   answer from a payload that failed them. A dense misparse is silent; the
   reader confabulates.
 - **W5 — SHOULD use a key-deduplicating encoding for uniform record arrays**
-  (3+ records): columnar JSON (−22%) when the pipe must stay valid JSON, ESO
+  (3+ records): columnar JSON (−22%) when the pipe must stay valid JSON, ESON
   (−28%) when both ends are yours and the primer amortizes (see
   bench/PRIMER-COST.md for the break-even).
 - **W6 — MUST keep irreversible instructions in schema-validated JSON.**
   Auth, money, migrations, deletes, revocations: explicit JSON validated
-  against an application schema — never ESO, never columnar. Compactness is
+  against an application schema — never ESON, never columnar. Compactness is
   not worth an ambiguous high-impact action.
 - **W7 — MUST use the canonical primer** ([PRIMER.md](PRIMER.md)) verbatim
-  when a model will read ESO. A paraphrased primer makes receiver behavior
+  when a model will read ESON. A paraphrased primer makes receiver behavior
   unreproducible across a fleet.
 - **W8 — MUST fall back to compact JSON when the receiver's capability is
   unknown** (see [NEGOTIATION.md](NEGOTIATION.md)). Adoption must never be a
@@ -43,7 +43,7 @@ behavior benches, not by linting a single message.
 ## Checking compliance
 
 ```bash
-node bin/eso.js lint < message        # W1, W4, W5, W6 on one payload
+node bin/eson.js lint < message        # W1, W4, W5, W6 on one payload
 ```
 
 Exit 0 = no MUST violations (SHOULDs report as suggestions). W2/W3/W8 are
@@ -54,5 +54,5 @@ as in the honey suite.
 ## Conformance statement
 
 A pipe conforms to Honey Wire v1 iff: every message passes `lint` with no
-MUST violations, ESO payloads decode against SPEC.md v1.1, the primer (when
+MUST violations, ESON payloads decode against SPEC.md v1.1, the primer (when
 used) is byte-identical to PRIMER.md, and the sender falls back per W8.

@@ -29,7 +29,7 @@ function undedupedArrays(value, path = "$", out = []) {
 
 // Carve-out fields (W6): flag when a key that names an irreversible action
 // carries a dense-encoded value. `dense` marks values already inside a dense
-// document (any ESO field) or a columnar block within JSON.
+// document (any ESON field) or a columnar block within JSON.
 function carveOutViolations(value, dense, out = new Set()) {
   if (Array.isArray(value)) value.forEach((item) => carveOutViolations(item, dense, out));
   else if (isRecord(value)) {
@@ -46,14 +46,14 @@ function lint(text) {
   const findings = [];
   const add = (rule, level, message) => findings.push({ rule, level, message });
 
-  if (text.startsWith("!eso/1")) {
+  if (text.startsWith("!eson/1")) {
     const res = tryDecode(text);
     if (!res.ok) {
-      add("W4", "error", `ESO payload fails integrity decode: ${res.error.message}`);
+      add("W4", "error", `ESON payload fails integrity decode: ${res.error.message}`);
       return { findings };
     }
     for (const key of carveOutViolations(res.value, true)) {
-      add("W6", "error", `field "${key}" looks like an irreversible-action payload; carry it as schema-validated JSON, not ESO`);
+      add("W6", "error", `field "${key}" looks like an irreversible-action payload; carry it as schema-validated JSON, not ESON`);
     }
     return { findings };
   }
@@ -62,7 +62,7 @@ function lint(text) {
   try {
     value = JSON.parse(text);
   } catch {
-    add("W1", "error", "payload is neither ESO (!eso/1) nor valid JSON");
+    add("W1", "error", "payload is neither ESON (!eson/1) nor valid JSON");
     return { findings };
   }
 
@@ -72,7 +72,7 @@ function lint(text) {
     add("W1", "error", `pretty-printed JSON: +${pct}% characters vs minified — emit JSON.stringify(value) with no indent`);
   }
   for (const path of undedupedArrays(value)) {
-    add("W5", "suggestion", `uniform record array at ${path} repeats its keys per row; use columnar JSON ({"#c":[cols],"#r":[rows]}) or ESO`);
+    add("W5", "suggestion", `uniform record array at ${path} repeats its keys per row; use columnar JSON ({"#c":[cols],"#r":[rows]}) or ESON`);
   }
   for (const key of carveOutViolations(value, false)) {
     add("W6", "error", `field "${key}" looks like an irreversible-action payload; carry it as plain schema-validated JSON, not columnar`);

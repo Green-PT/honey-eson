@@ -1,12 +1,12 @@
 {
-  "eso": "1",
+  "eson": "1",
   "valid": [
     {
       "name": "scalar string bare",
       "value": {
         "greeting": "hello world"
       },
-      "eso": "!eso/1\ngreeting=hello world\n"
+      "eson": "!eson/1\ngreeting=hello world\n"
     },
     {
       "name": "scalar types",
@@ -19,14 +19,14 @@
         "fl": false,
         "nil": null
       },
-      "eso": "!eso/1\ns=x\ni=42\nf=3.14\nneg=-2.5\nt=true\nfl=false\nnil=null\n"
+      "eson": "!eson/1\ns=x\ni=42\nf=3.14\nneg=-2.5\nt=true\nfl=false\nnil=null\n"
     },
     {
       "name": "quoted: empty string",
       "value": {
         "s": ""
       },
-      "eso": "!eso/1\ns=\"\"\n"
+      "eson": "!eson/1\ns=\"\"\n"
     },
     {
       "name": "quoted: literal lookalikes",
@@ -35,7 +35,7 @@
         "b": "true",
         "c": "false"
       },
-      "eso": "!eso/1\na=\"null\"\nb=\"true\"\nc=\"false\"\n"
+      "eson": "!eson/1\na=\"null\"\nb=\"true\"\nc=\"false\"\n"
     },
     {
       "name": "quoted: number lookalikes",
@@ -46,7 +46,7 @@
         "d": "-0",
         "e": "1e3"
       },
-      "eso": "!eso/1\na=\"42\"\nb=\"1.0\"\nc=01\nd=\"-0\"\ne=\"1e3\"\n"
+      "eson": "!eson/1\na=\"42\"\nb=\"1.0\"\nc=01\nd=\"-0\"\ne=\"1e3\"\n"
     },
     {
       "name": "quoted: whitespace and control",
@@ -55,7 +55,7 @@
         "b": "a\tb",
         "c": "a\nb"
       },
-      "eso": "!eso/1\na=\"  padded  \"\nb=\"a\\tb\"\nc=\"a\\nb\"\n"
+      "eson": "!eson/1\na=\"  padded  \"\nb=\"a\\tb\"\nc=\"a\\nb\"\n"
     },
     {
       "name": "quoted: JSON-opening characters",
@@ -64,16 +64,16 @@
         "b": "[bracket",
         "c": "{brace"
       },
-      "eso": "!eso/1\na=\"\\\"quote\"\nb=\"[bracket\"\nc=\"{brace\"\n"
+      "eson": "!eson/1\na=\"\\\"quote\"\nb=\"[bracket\"\nc=\"{brace\"\n"
     },
     {
       "name": "bare: grammar lookalikes are data in cells",
       "value": {
-        "a": "!eso/1",
+        "a": "!eson/1",
         "b": "x[2]{y}",
         "c": "k=v"
       },
-      "eso": "!eso/1\na=!eso/1\nb=x[2]{y}\nc=k=v\n"
+      "eson": "!eson/1\na=!eson/1\nb=x[2]{y}\nc=k=v\n"
     },
     {
       "name": "unicode strings",
@@ -81,7 +81,7 @@
         "s": "café 🚀",
         "back": "back\\slash"
       },
-      "eso": "!eso/1\ns=café 🚀\nback=back\\slash\n"
+      "eson": "!eson/1\ns=café 🚀\nback=back\\slash\n"
     },
     {
       "name": "scalar array",
@@ -93,14 +93,14 @@
           true
         ]
       },
-      "eso": "!eso/1\nxs[4]\n1\ntwo\nnull\ntrue\n"
+      "eson": "!eson/1\nxs[4]\n1\ntwo\nnull\ntrue\n"
     },
     {
       "name": "empty array",
       "value": {
         "xs": []
       },
-      "eso": "!eso/1\nxs[0]\n"
+      "eson": "!eson/1\nxs[0]\n"
     },
     {
       "name": "record array",
@@ -126,7 +126,7 @@
           }
         ]
       },
-      "eso": "!eso/1\nfindings[3]{severity,file,line,message}\nhigh\tsrc/auth.js\t42\ttoken never expires\nmedium\tsrc/api.js\t18\tmissing rate limit\nlow\tsrc/ui.js\tnull\t\"true\"\n"
+      "eson": "!eson/1\nfindings[3]{severity,file,line,message}\nhigh\tsrc/auth.js\t42\ttoken never expires\nmedium\tsrc/api.js\t18\tmissing rate limit\nlow\tsrc/ui.js\tnull\t\"true\"\n"
     },
     {
       "name": "numbered record array (reserved n)",
@@ -146,7 +146,7 @@
           }
         ]
       },
-      "eso": "!eso/1\nrows[3]{n,x}\n1\ta\n2\tb\n3\tc\n"
+      "eson": "!eson/1\nrows[3]{n,x}\n1\ta\n2\tb\n3\tc\n"
     },
     {
       "name": "single record",
@@ -156,14 +156,14 @@
           "retry": null
         }
       },
-      "eso": "!eso/1\nmeta{complete,retry}\ntrue\tnull\n"
+      "eson": "!eson/1\nmeta{complete,retry}\ntrue\tnull\n"
     },
     {
       "name": "empty object",
       "value": {
         "meta": {}
       },
-      "eso": "!eso/1\nmeta{}\n\n"
+      "eson": "!eson/1\nmeta{}\n\n"
     },
     {
       "name": "empty records in array",
@@ -173,7 +173,7 @@
           {}
         ]
       },
-      "eso": "!eso/1\nrows[2]{}\n\n\n"
+      "eson": "!eson/1\nrows[2]{}\n\n\n"
     },
     {
       "name": "nested values as JSON cells",
@@ -200,7 +200,7 @@
           }
         ]
       },
-      "eso": "!eso/1\ncfg{tags,limits}\n[\"security\",\"api\"]\t{\"rps\":10,\"burst\":null}\nrows[1]{id,opts}\n1\t{\"deep\":[1,2]}\n"
+      "eson": "!eson/1\ncfg{tags,limits}\n[\"security\",\"api\"]\t{\"rps\":10,\"burst\":null}\nrows[1]{id,opts}\n1\t{\"deep\":[1,2]}\n"
     },
     {
       "name": "mixed-type array falls back to scalar rows",
@@ -213,7 +213,7 @@
           2
         ]
       },
-      "eso": "!eso/1\nxs[3]\n{\"a\":1}\nplain\n2\n"
+      "eson": "!eson/1\nxs[3]\n{\"a\":1}\nplain\n2\n"
     },
     {
       "name": "full envelope",
@@ -245,7 +245,7 @@
           ]
         }
       },
-      "eso": "!eso/1\nfrom=reviewer\nto=implementer\nkind=code_review\nid=review-42\nfindings[2]{severity,file,line,message}\nhigh\tsrc/auth.js\t42\ttoken never expires\nmedium\tsrc/api.js\t18\tmissing rate limit\nmeta{complete,retry,tags}\ntrue\tnull\t[\"security\",\"api\"]\n"
+      "eson": "!eson/1\nfrom=reviewer\nto=implementer\nkind=code_review\nid=review-42\nfindings[2]{severity,file,line,message}\nhigh\tsrc/auth.js\t42\ttoken never expires\nmedium\tsrc/api.js\t18\tmissing rate limit\nmeta{complete,retry,tags}\ntrue\tnull\t[\"security\",\"api\"]\n"
     }
   ],
   "decode_only": [
@@ -259,71 +259,71 @@
           }
         ]
       },
-      "eso": "!eso/1\r\na=1\r\nrows[1]{x}\r\ny\r\n"
+      "eson": "!eson/1\r\na=1\r\nrows[1]{x}\r\ny\r\n"
     },
     {
       "name": "missing trailing newline",
       "value": {
         "a": 1
       },
-      "eso": "!eso/1\na=1"
+      "eson": "!eson/1\na=1"
     },
     {
       "name": "needlessly quoted bare-safe string",
       "value": {
         "s": "plain"
       },
-      "eso": "!eso/1\ns=\"plain\"\n"
+      "eson": "!eson/1\ns=\"plain\"\n"
     }
   ],
   "invalid": [
     {
       "name": "missing header",
-      "eso": "a=1\n"
+      "eson": "a=1\n"
     },
     {
       "name": "wrong version header",
-      "eso": "!eso/2\na=1\n"
+      "eson": "!eson/2\na=1\n"
     },
     {
       "name": "truncated record array (count checksum)",
-      "eso": "!eso/1\nrows[2]{id}\n1\n"
+      "eson": "!eson/1\nrows[2]{id}\n1\n"
     },
     {
       "name": "extra row becomes invalid section",
-      "eso": "!eso/1\nrows[1]{id}\n1\n2\n"
+      "eson": "!eson/1\nrows[1]{id}\n1\n2\n"
     },
     {
       "name": "row with wrong cell count",
-      "eso": "!eso/1\nrows[1]{a,b}\n1\n"
+      "eson": "!eson/1\nrows[1]{a,b}\n1\n"
     },
     {
       "name": "duplicate top-level name",
-      "eso": "!eso/1\na=1\na=2\n"
+      "eson": "!eson/1\na=1\na=2\n"
     },
     {
       "name": "duplicate field name",
-      "eso": "!eso/1\nrow{x,x}\n1\t2\n"
+      "eson": "!eson/1\nrow{x,x}\n1\t2\n"
     },
     {
       "name": "invalid name",
-      "eso": "!eso/1\n1abc=1\n"
+      "eson": "!eson/1\n1abc=1\n"
     },
     {
       "name": "reserved n not sequential",
-      "eso": "!eso/1\nrows[2]{n,x}\n1\ta\n3\tb\n"
+      "eson": "!eson/1\nrows[2]{n,x}\n1\ta\n3\tb\n"
     },
     {
       "name": "reserved n reordered",
-      "eso": "!eso/1\nrows[2]{n,x}\n2\ta\n1\tb\n"
+      "eson": "!eson/1\nrows[2]{n,x}\n2\ta\n1\tb\n"
     },
     {
       "name": "malformed JSON cell",
-      "eso": "!eso/1\na={\"broken\n"
+      "eson": "!eson/1\na={\"broken\n"
     },
     {
       "name": "non-finite number",
-      "eso": "!eso/1\nn=1e999\n"
+      "eson": "!eson/1\nn=1e999\n"
     }
   ]
 }

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 "use strict";
 // Regenerates vectors.json from the JS reference implementation.
-// Valid vectors pin canonical encoding (encode(value) === eso) and lossless
-// decoding (decode(eso) deepEquals value). decode_only vectors are legal inputs
+// Valid vectors pin canonical encoding (encode(value) === eson) and lossless
+// decoding (decode(eson) deepEquals value). decode_only vectors are legal inputs
 // a canonical encoder would not produce. Invalid vectors MUST be rejected.
 // Values stay within plain JSON (no BigInt, no -0) so the file is language-neutral;
 // arbitrary-precision integers are spec-mandated but tested per-implementation.
@@ -11,7 +11,7 @@ const fs = require("fs");
 const path = require("path");
 const { encode } = require("../js");
 
-const v = (name, value, opts) => ({ name, value, eso: encode(value, opts) });
+const v = (name, value, opts) => ({ name, value, eson: encode(value, opts) });
 
 const valid = [
   v("scalar string bare", { greeting: "hello world" }),
@@ -21,7 +21,7 @@ const valid = [
   v("quoted: number lookalikes", { a: "42", b: "1.0", c: "01", d: "-0", e: "1e3" }),
   v("quoted: whitespace and control", { a: "  padded  ", b: "a\tb", c: "a\nb" }),
   v("quoted: JSON-opening characters", { a: '"quote', b: "[bracket", c: "{brace" }),
-  v("bare: grammar lookalikes are data in cells", { a: "!eso/1", b: "x[2]{y}", c: "k=v" }),
+  v("bare: grammar lookalikes are data in cells", { a: "!eson/1", b: "x[2]{y}", c: "k=v" }),
   v("unicode strings", { s: "café 🚀", back: "back\\slash" }),
   v("scalar array", { xs: [1, "two", null, true] }),
   v("empty array", { xs: [] }),
@@ -54,34 +54,34 @@ const valid = [
 ];
 
 const decodeOnly = [
-  { name: "CRLF line endings", value: { a: 1, rows: [{ x: "y" }] }, eso: "!eso/1\r\na=1\r\nrows[1]{x}\r\ny\r\n" },
-  { name: "missing trailing newline", value: { a: 1 }, eso: "!eso/1\na=1" },
-  { name: "needlessly quoted bare-safe string", value: { s: "plain" }, eso: '!eso/1\ns="plain"\n' },
+  { name: "CRLF line endings", value: { a: 1, rows: [{ x: "y" }] }, eson: "!eson/1\r\na=1\r\nrows[1]{x}\r\ny\r\n" },
+  { name: "missing trailing newline", value: { a: 1 }, eson: "!eson/1\na=1" },
+  { name: "needlessly quoted bare-safe string", value: { s: "plain" }, eson: '!eson/1\ns="plain"\n' },
 ];
 
 const invalid = [
-  { name: "missing header", eso: "a=1\n" },
-  { name: "wrong version header", eso: "!eso/2\na=1\n" },
-  { name: "truncated record array (count checksum)", eso: "!eso/1\nrows[2]{id}\n1\n" },
-  { name: "extra row becomes invalid section", eso: "!eso/1\nrows[1]{id}\n1\n2\n" },
-  { name: "row with wrong cell count", eso: "!eso/1\nrows[1]{a,b}\n1\n" },
-  { name: "duplicate top-level name", eso: "!eso/1\na=1\na=2\n" },
-  { name: "duplicate field name", eso: "!eso/1\nrow{x,x}\n1\t2\n" },
-  { name: "invalid name", eso: "!eso/1\n1abc=1\n" },
-  { name: "reserved n not sequential", eso: "!eso/1\nrows[2]{n,x}\n1\ta\n3\tb\n" },
-  { name: "reserved n reordered", eso: "!eso/1\nrows[2]{n,x}\n2\ta\n1\tb\n" },
-  { name: "malformed JSON cell", eso: '!eso/1\na={"broken\n' },
-  { name: "non-finite number", eso: "!eso/1\nn=1e999\n" },
+  { name: "missing header", eson: "a=1\n" },
+  { name: "wrong version header", eson: "!eson/2\na=1\n" },
+  { name: "truncated record array (count checksum)", eson: "!eson/1\nrows[2]{id}\n1\n" },
+  { name: "extra row becomes invalid section", eson: "!eson/1\nrows[1]{id}\n1\n2\n" },
+  { name: "row with wrong cell count", eson: "!eson/1\nrows[1]{a,b}\n1\n" },
+  { name: "duplicate top-level name", eson: "!eson/1\na=1\na=2\n" },
+  { name: "duplicate field name", eson: "!eson/1\nrow{x,x}\n1\t2\n" },
+  { name: "invalid name", eson: "!eson/1\n1abc=1\n" },
+  { name: "reserved n not sequential", eson: "!eson/1\nrows[2]{n,x}\n1\ta\n3\tb\n" },
+  { name: "reserved n reordered", eson: "!eson/1\nrows[2]{n,x}\n2\ta\n1\tb\n" },
+  { name: "malformed JSON cell", eson: '!eson/1\na={"broken\n' },
+  { name: "non-finite number", eson: "!eson/1\nn=1e999\n" },
 ];
 
 // the numbered vector must be reproducible via the number option too
 const numbered = encode({ rows: [{ x: "a" }, { x: "b" }, { x: "c" }] }, { number: true });
-if (numbered !== valid.find((x) => x.name.startsWith("numbered")).eso) {
+if (numbered !== valid.find((x) => x.name.startsWith("numbered")).eson) {
   throw new Error("number:true output drifted from the numbered vector");
 }
 
 fs.writeFileSync(
   path.join(__dirname, "vectors.json"),
-  JSON.stringify({ eso: "1", valid, decode_only: decodeOnly, invalid }, null, 2) + "\n"
+  JSON.stringify({ eson: "1", valid, decode_only: decodeOnly, invalid }, null, 2) + "\n"
 );
 console.log(`vectors.json: ${valid.length} valid, ${decodeOnly.length} decode-only, ${invalid.length} invalid`);
